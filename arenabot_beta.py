@@ -41,10 +41,10 @@ def fitnessRobot(listOfCommands, visualize=False):
     for command in listOfCommands:
         if command[0] == 'r':
             Degree = Degree + int(command[6:len(command)])
-            #print('Degree :',Degree)
+            # print('Degree :',Degree)
         else:
             distance = int(command[4:len(command)])
-            #print(distance)
+            # print(distance)
             destiX = robotX + distance*math.cos(Degree/180*math.pi)
             destiY = robotY + distance*math.sin(Degree/180*math.pi)
             if move_possible(walls,destiX,destiY):
@@ -53,8 +53,8 @@ def fitnessRobot(listOfCommands, visualize=False):
                 positions.append([robotX, robotY])
             else:
                 break
-            #print("robotX : ", robotX)
-            #print("robotY : ", robotY)
+            # print("robotX : ", robotX)
+            # print("robotY : ", robotY)
 
     distanceFromObjective = math.sqrt((robotX - objectiveX) ** 2 + (robotY - objectiveY) ** 2)
 
@@ -103,35 +103,41 @@ def tournamentSelection(population, size):
 
 
 def croisement(genome1, genome2):
-    n_commands = len(genome1)
+    n_commands1 = len(genome1)
+    n_commands2 = len(genome2)
+    print(n_commands1, n_commands2)
+    print()
     enfant = []
     #pCros = random.uniform(0, 1)
     pCros = 0.5
-    for i in range(n_commands):
+    for i in range(n_commands1):
         ifCros = random.uniform(0, 1)
         if ifCros < pCros:
-            enfant.append(genome2[i])
-        else:
             enfant.append(genome1[i])
+        else:
+            enfant.append(genome2[i])
     return enfant
 
 
 # can't change frome rotate to move or from move to rotate
 def mutation(genome, mu, tau_move, tau_rotation):
     n_commands = len(genome)
+    enfant = []
     for i in range(n_commands):
         pMu = random.uniform(0, 1)
         if pMu < mu:
             if genome[i][0] == 'r':
                 angle = int(genome[i][6:len(genome[i])])
                 angle = angle + random.randint(-tau_rotation, tau_rotation)
-                genome[i] = 'rotate' + str(angle)
+                enfant.append( 'rotate' + str(angle))
             else:
                 length = int(genome[i][4:len(genome[i])])
                 length = length + random.randint(-tau_move, tau_move)
                 length = max(0, min(length, 40))
-                genome[i] = 'move' + str(length)
-    return genome
+                enfant.append('move' + str(length))
+        else:
+            enfant.append(genome[i])
+    return enfant
 
 
 '''TAUX DE RENOUVELLEMENT FIXE '''
@@ -235,10 +241,10 @@ def main():
     # listOfCommands = []
     # fitnessRobot(listOfCommands, visualize=True)
 
-    popSize = 50  # population
-    n_commands = 40  # length of the command list of each person
+    popSize = 20  # population
+    n_commands = 20  # length of the command list of each person
     n_rotate = 0.2  # proportion of rotate commands
-    n_gen = 20  # number of generations
+    n_gen = 10  # number of generations
 
     # generation 0
     population = []
@@ -294,9 +300,11 @@ def main():
         stdFit = np.std(fitnesses)
         infosFitnesses.append([bestFit, meanFit, worstFit, stdFit])
         print('Gen ', it + 1, ': Best: ', bestFit, ' Mean: ', meanFit, ' Worst:', worstFit, 'Std: ', stdFit)
+        # print('Population', population)
         print('fitness :',fitnesses)
         print('fitness_correspondant_list_of_Command :',Ge)
         print('\n')
+        # print(fitnessRobot(population[0]['Genome'], False), population[0]['Fitness'])
 
     fitnessRobot(population[0]['Genome'], True)
     return 0

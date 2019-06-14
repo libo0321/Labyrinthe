@@ -123,19 +123,23 @@ def croisement(genome1, genome2):
 # can't change frome rotate to move or from move to rotate
 def mutation(genome, mu, tau_move, tau_rotation):
     n_commands = len(genome)
+    enfant = []
     for i in range(n_commands):
         pMu = random.uniform(0, 1)
-        if pMu<mu:
-            if genome[i][0]=='r':
+        if pMu < mu:
+            if genome[i][0] == 'r':
                 angle = int(genome[i][6:len(genome[i])])
                 angle = angle + random.randint(-tau_rotation, tau_rotation)
-                genome[i] = 'rotate' + str(angle)
+                enfant.append( 'rotate' + str(angle))
             else:
                 length = int(genome[i][4:len(genome[i])])
                 length = length + random.randint(-tau_move, tau_move)
                 length = max(0, min(length, 40))
-                genome[i] = 'move' + str(length)
-    return genome
+                enfant.append('move' + str(length))
+        else:
+            enfant.append(genome[i])
+    return enfant
+
 
 '''TAUX DE RENOUVELLEMENT FIXE '''
 '''This function will generate the next generation with the first method: mu-lambda best parents are conserved, and lambda new children are produced.'''
