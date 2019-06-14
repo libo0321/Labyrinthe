@@ -272,9 +272,9 @@ def main():
     print('Gen ', 0, ': Best: ', bestFit, ' Mean: ', meanFit, ' Worst:', worstFit, 'Std: ', stdFit)
 
 
-    print(fitnesses)
+    print('fitness :',fitnesses)
     Ge = [fitnessRobot(p['Genome'], False) for p in population]
-    print(Ge)
+    print('fitness_correspondant_list_of_Command :',Ge)
 
 
     p_croisement = 0.5  # proportion of croisement, 1-p_croisement the proportion of mutatoion
@@ -294,8 +294,8 @@ def main():
         stdFit = np.std(fitnesses)
         infosFitnesses.append([bestFit, meanFit, worstFit, stdFit])
         print('Gen ', it + 1, ': Best: ', bestFit, ' Mean: ', meanFit, ' Worst:', worstFit, 'Std: ', stdFit)
-        print(fitnesses)
-        print(Ge)
+        print('fitness :',fitnesses)
+        print('fitness_correspondant_list_of_Command :',Ge)
         print('\n')
 
     fitnessRobot(population[0]['Genome'], True)
