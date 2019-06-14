@@ -101,8 +101,11 @@ def main() :
         newIndividual['Fitness'] = fitnessRobot(commands, False)
         population.append(newIndividual)
     
+    #Tri de la population en fonction de la Fitness des individus
+    population = sorted(population, key=lambda k:k['Fitness'], reverse=Direction=='Minimisation')
+    
     #Calcul des informations sur la population : meilleure fitness, fitness moyenne, pire fitness et déviation standard des fitness
-    fitnesses=[p['Fitness'] for p in population]
+    fitnesses = [p['Fitness'] for p in population]
     infosFitnesses = []
     bestFit = fitnesses[0]
     meanFit = np.mean(fitnesses)
@@ -113,7 +116,7 @@ def main() :
 
     
     for it in range(n_gen): # un tour de boucle = une génération
-        offsprings = []
+        poplulation = nextGeneration(population)
         
 	
 	return 0
