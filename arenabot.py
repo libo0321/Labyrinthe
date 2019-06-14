@@ -1,79 +1,103 @@
-# Simple script that simulates a bot moving inside an Arena, following a series of commands
-# by Alberto Tonda, 2018 <alberto.tonda@gmail.com>
-
 import sys
 import random
 import numpy as np
-
+import math
 
 '''This function accepts in input a list of strings, and tries to parse them to update the position of a robot. Then returns distance from objective.'''
-def fitnessRobot(listOfCommands, visualize=False) :
-    
+
+
+def fitnessRobot(listOfCommands, visualize=False):
     # the Arena is a 100 x 100 pixel space
     arenaLength = 100
     arenaWidth = 100
-    
+    print(listOfCommands)
     # let's also put a couple of walls in the arena; walls are described by a set of 4 (x,y) corners (bottom-left, top-left, top-right, bottom-right)
     walls = []
-    
+
     wall1 = dict()
     wall1["x"] = 30
     wall1["y"] = 0
     wall1["width"] = 10
     wall1["height"] = 80
-    
+
     wall2 = dict()
     wall2["x"] = 70
     wall2["y"] = 20
     wall2["width"] = 10
     wall2["height"] = 80
-    
+
     walls.append(wall1)
     walls.append(wall2)
-    
+
     # initial position and orientation of the robot
-    startX = robotX = 10
-    startY = robotY = 10
-    startDegrees = 90 # 90°
-    
+    robotX = 10
+    robotY = 10
+    Degree= 90  # 90°
+
     # position of the objective
     objectiveX = 90
     objectiveY = 90
-    
+
     # this is a list of points that the robot will visit; used later to visualize its path
     positions = []
-    positions.append( [robotX, robotY] )
+    positions.append([robotX, robotY])
 
-    # TODO move robot, check that the robot stays inside the arena and stop movement if a wall is hit
-    # TODO measure distance from objective
-    distanceFromObjective = 0
-    
+    # TODO move robot, check that the robot stays inside the arena and stop movement if a wall is hit\
+    for command in listOfCommands:
+        if command.startswith('rotate'):
+            Degree = Degree + int(command[6:len(command)])
+            print('Degree :',Degree)
+        else:
+            distance = int(command[4:len(command)])
+            print(distance)
+            destiX = robotX + distance*math.cos(Degree/180*math.pi)
+            destiY = robotY + distance*math.sin(Degree/180*math.pi)
+            if move_possible(walls,destiX,destiY):
+                robotX = destiX
+                robotY = destiY
+            else:
+                break
+            print("robotX : ", robotX)
+            print("robotY : ", robotY)
+    # measure distance from objective
+
+    distanceFromObjective = math.sqrt((robotX-objectiveX)**2+(robotY-objectiveY)**2)
+
     # this is optional, argument "visualize" has to be explicitly set to "True" when function is called
-    if visualize :
-        
+    if visualize:
+
         import matplotlib.pyplot as plt
         import matplotlib.patches as patches
         figure = plt.figure()
         ax = figure.add_subplot(111)
-        
+
         # plot initial position and objective
         ax.plot(startX, startY, 'r^', label="Initial position of the robot")
         ax.plot(objectiveX, objectiveY, 'gx', label="Position of the objective")
-        
+
         # plot the walls
-        for wall in walls :
-            ax.add_patch(patches.Rectangle( (wall["x"], wall["y"]), wall["width"], wall["height"] ))
-        
+        for wall in walls:
+            ax.add_patch(patches.Rectangle((wall["x"], wall["y"]), wall["width"], wall["height"]))
+
         # plot a series of lines describing the movement of the robot in the arena
-        for i in range(1, len(positions)) :
-            ax.plot( [ positions[i-1][0], positions[i][0] ], [ positions[i-1][1], positions[i][1] ], 'r-', label="Robot path" )
-        
+        for i in range(1, len(positions)):
+            ax.plot([positions[i - 1][0], positions[i][0]], [positions[i - 1][1], positions[i][1]], 'r-',
+                    label="Robot path")
+
         ax.set_title("Movements of the robot inside the arena")
         ax.legend(loc='best')
         plt.show()
-    
+
     return distanceFromObjective
 
+def move_possible(walls,a,b):
+    for wall in walls:
+        if a > 0 and a < 100 and b >0 and b < 100:
+            if a > wall['x'] and a < wall['x']+wall['width'] and b > wall['y'] and b <wall['y'] + wall['height'] :
+                return False
+        else:
+            return False
+    return True
 
 def tournamentSelection(population, size):
     tourn=np.random.choice(population,size, replace=False) # Selection du nombre d'individu pour le tournoi
