@@ -103,7 +103,7 @@ def mutation(genome, mu, tau_move, tau_rotation):
             else:
                 length = filter(str.isdigit, genome[i])
                 length = length + randint(-tau_move, tau_move)
-                length = max(0, min(length, 90))
+                length = max(0, min(length, 40))
                 genome[i] = 'move' + length
     return genome
 
@@ -218,8 +218,8 @@ def main() :
                 # rotate angle should be between -90 and 90
                 command = 'rotate' + str(random.randint(-90, 90))
             else:
-                # move length should be between 1 and 90
-                command = 'move' + str(random.randint(1,90))
+                # move length should be between 1 and 40
+                command = 'move' + str(random.randint(1,40))
             commands.append(command)
         newIndividual['Genome'] = commands
         newIndividual['Fitness'] = fitnessRobot(commands, False)
