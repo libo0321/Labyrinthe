@@ -56,10 +56,12 @@ def fitnessRobot(listOfCommands, visualize=False):
             if move_possible(walls,destiX,destiY):
                 robotX = destiX
                 robotY = destiY
+                positions.append([robotX, robotY])
             else:
                 break
             print("robotX : ", robotX)
             print("robotY : ", robotY)
+            
     # measure distance from objective
 
     distanceFromObjective = math.sqrt((robotX-objectiveX)**2+(robotY-objectiveY)**2)
@@ -108,12 +110,15 @@ def tournamentSelection(population, size):
 
 def croisement(genome1, genome2):
     n_commands = len(genome1)
+    enfant = []
     pCros = random.uniform(0, 1)
     for i in range(n_commands):
         ifCros = random.uniform(0, 1)
         if ifCros<pCros:
-            genome1[i] = genome2[i]
-    return genome1
+            enfant.append(genome1[i])
+        else:
+            enfant.append(genome2[i])
+    return enfant
 
 # can't change frome rotate to move or from move to rotate
 def mutation(genome, mu, tau_move, tau_rotation):
@@ -268,9 +273,9 @@ def main() :
     
     for it in range(n_gen): # un tour de boucle = une génération
         # 3 ways to generate the next generation
-        poplulation = nextGeneration_1(population, popSize, p_croisement, p_enfant)
-        # poplulation = nextGeneration_2(population, popSize, p_croisement)
-        # poplulation = nextGeneration_3(population, popSize, p_croisement, p_enfant)
+        population = nextGeneration_1(population, popSize, p_croisement, p_enfant)
+        # population = nextGeneration_2(population, popSize, p_croisement)
+        # population = nextGeneration_3(population, popSize, p_croisement, p_enfant)
         fitnesses = [p['Fitness'] for p in population]
         infosFitnesses = []
         bestFit = fitnesses[0]
@@ -280,6 +285,7 @@ def main() :
         infosFitnesses.append([bestFit, meanFit, worstFit, stdFit])
         print('Gen ', it+1, ': Best: ', bestFit, ' Mean: ', meanFit, ' Worst:', worstFit, 'Std: ', stdFit)
     fitnessRobot(population[0]['Genome'], True)
+    print(population[0]['Fitness'])
     return 0
 
 if __name__ == "__main__" :
