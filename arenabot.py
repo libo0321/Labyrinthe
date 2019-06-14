@@ -4,13 +4,11 @@ import numpy as np
 import math
 
 '''This function accepts in input a list of strings, and tries to parse them to update the position of a robot. Then returns distance from objective.'''
-
-
 def fitnessRobot(listOfCommands, visualize=False):
     # the Arena is a 100 x 100 pixel space
     arenaLength = 100
     arenaWidth = 100
-    print(listOfCommands)
+    # print(listOfCommands)
     # let's also put a couple of walls in the arena; walls are described by a set of 4 (x,y) corners (bottom-left, top-left, top-right, bottom-right)
     walls = []
 
@@ -47,10 +45,10 @@ def fitnessRobot(listOfCommands, visualize=False):
     for command in listOfCommands:
         if command.startswith('rotate'):
             Degree = Degree + int(command[6:len(command)])
-            print('Degree :',Degree)
+            # print('Degree :',Degree)
         else:
             distance = int(command[4:len(command)])
-            print(distance)
+            # print(distance)
             destiX = robotX + distance*math.cos(Degree/180*math.pi)
             destiY = robotY + distance*math.sin(Degree/180*math.pi)
             if move_possible(walls,destiX,destiY):
@@ -59,8 +57,8 @@ def fitnessRobot(listOfCommands, visualize=False):
                 positions.append([robotX, robotY])
             else:
                 break
-            print("robotX : ", robotX)
-            print("robotY : ", robotY)
+            # print("robotX : ", robotX)
+            # print("robotY : ", robotY)
             
     # measure distance from objective
 
@@ -169,6 +167,7 @@ def nextGeneration_1(population, popSize, p_croisement, p_enfant):
     mergedPopulation = sorted(mergedPopulation, key=lambda k:k['Fitness'])
     return mergedPopulation
 
+
 '''TAUX DE RENOUVELLEMENT VARIABLE'''
 '''This function will generate the next generation with the second method: all parents are conserved, and lambda (for now lambda=popSize) new children are produced, and we select popSize best individuals in the merged population.'''
 def nextGeneration_2(population, popSize, p_croisement):
@@ -202,6 +201,8 @@ def nextGeneration_2(population, popSize, p_croisement):
 def nextGeneration_3(population, popSize, p_croisement, p_change):
     n_change = int(popSize * p_change)
     n_parent = popSize - n_change
+    mergedPopulation = population[0: n_parent]
+    Rpop = population[n_parent: popSize]
     n_croisement = int(n_change * p_croisement)
     n_mutation = n_change - n_croisement
     tournSize = 2 # Taille de tournoi
@@ -210,23 +211,24 @@ def nextGeneration_3(population, popSize, p_croisement, p_change):
         newIndividual1 = {}
         newIndividual2 = {}
         # Selection de l'individu à croiser
-        indv1 = tournamentSelection(population[n_parent:popSize], tournSize)
-        indv2 = tournamentSelection(population[n_parent:popSize], tournSize)
+        indv1 = tournamentSelection(Rpop, tournSize)
+        indv2 = tournamentSelection(Rpop, tournSize)
         newIndividual1['Genome'] = croisement(indv1['Genome'], indv2['Genome'])
         newIndividual1['Fitness'] = fitnessRobot(newIndividual1['Genome'], False)
         newIndividual2['Genome'] = croisement(indv1['Genome'], indv2['Genome'])
         newIndividual2['Fitness'] = fitnessRobot(newIndividual2['Genome'], False)
-        population[population.index(indv1)] = newIndividual1
-        population[population.index(indv2)] = newIndividual2
+        Rpop[Rpop.index(indv1)] = newIndividual1
+        Rpop[Rpop.index(indv2)] = newIndividual2
     # generate children by mutation
     for i in range(n_mutation):
-        indv = tournamentSelection(population[n_parent:popSize], tournSize)
+        indv = tournamentSelection(Rpop, tournSize)
         newIndividual = {}
         newIndividual['Genome'] = mutation(indv['Genome'], 0.3, 10, 10)
         newIndividual['Fitness'] = fitnessRobot(newIndividual['Genome'], False)
-        population[population.index(indv)] = newIndividual
-    population = sorted(population, key=lambda k:k['Fitness'])
-    return population
+        Rpop[Rpop.index(indv)] = newIndividual
+    mergedPopulation = mergedPopulation + Rpop
+    mergedPopulation = sorted(mergedPopulation, key=lambda k:k['Fitness'])
+    return mergedPopulation
 
 
 ################# MAIN
@@ -291,6 +293,7 @@ def main() :
     fitnessRobot(population[0]['Genome'], True)
     print(population[0]['Fitness'])
     return 0
+
 
 if __name__ == "__main__" :
 	sys.exit( main() )

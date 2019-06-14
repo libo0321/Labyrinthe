@@ -203,36 +203,37 @@ def nextGeneration_2(population, popSize, p_croisement):
 
 '''L'ENCHAÎNEMENT DES OPÉRATIONS : en parallèle '''
 '''This function will generate the next generation with the third method: elite parents are conserved, and p_croisement of the rest will do the croisement and then p_mutation of them mutate.'''
-
-
 def nextGeneration_3(population, popSize, p_croisement, p_change):
     n_change = int(popSize * p_change)
     n_parent = popSize - n_change
+    mergedPopulation = population[0: n_parent]
+    Rpop = population[n_parent: popSize]
     n_croisement = int(n_change * p_croisement)
     n_mutation = n_change - n_croisement
-    tournSize = 2  # Taille de tournoi
+    tournSize = 2 # Taille de tournoi
     # generate children by croisement
-    for i in range(int(n_croisement / 2)):
+    for i in range(int(n_croisement/2)):
         newIndividual1 = {}
         newIndividual2 = {}
         # Selection de l'individu à croiser
-        indv1 = tournamentSelection(population[n_parent:popSize], tournSize)
-        indv2 = tournamentSelection(population[n_parent:popSize], tournSize)
+        indv1 = tournamentSelection(Rpop, tournSize)
+        indv2 = tournamentSelection(Rpop, tournSize)
         newIndividual1['Genome'] = croisement(indv1['Genome'], indv2['Genome'])
         newIndividual1['Fitness'] = fitnessRobot(newIndividual1['Genome'], False)
         newIndividual2['Genome'] = croisement(indv1['Genome'], indv2['Genome'])
         newIndividual2['Fitness'] = fitnessRobot(newIndividual2['Genome'], False)
-        population[population.index(indv1)] = newIndividual1
-        population[population.index(indv2)] = newIndividual2
+        Rpop[Rpop.index(indv1)] = newIndividual1
+        Rpop[Rpop.index(indv2)] = newIndividual2
     # generate children by mutation
     for i in range(n_mutation):
-        indv = tournamentSelection(population[n_parent:popSize], tournSize)
+        indv = tournamentSelection(Rpop, tournSize)
         newIndividual = {}
         newIndividual['Genome'] = mutation(indv['Genome'], 0.3, 10, 10)
         newIndividual['Fitness'] = fitnessRobot(newIndividual['Genome'], False)
-        population[population.index(indv)] = newIndividual
-    population = sorted(population, key=lambda k: k['Fitness'])
-    return population
+        Rpop[Rpop.index(indv)] = newIndividual
+    mergedPopulation = mergedPopulation + Rpop
+    mergedPopulation = sorted(mergedPopulation, key=lambda k:k['Fitness'])
+    return mergedPopulation
 
 
 ################# MAIN
