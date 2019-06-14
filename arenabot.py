@@ -128,7 +128,7 @@ def mutation(genome, mu, tau_move, tau_rotation):
                 length = filter(str.isdigit, genome[i])
                 length = length + randint(-tau_move, tau_move)
                 length = max(0, min(length, 40))
-                genome[i] = 'move' + length
+                genome[i] = 'move' + str(length)
     return genome
 
 '''TAUX DE RENOUVELLEMENT FIXE '''
@@ -153,7 +153,7 @@ def nextGeneration_1(population, popSize, p_croisement, p_enfant):
     for i in range(n_mutation):
         indv = tournamentSelection(population, tournSize)
         newIndividual = {}
-        newIndividual['Genome'] = mutation(indv['Genome'], 0.3, 20, 10)
+        newIndividual['Genome'] = mutation(indv['Genome'], 0.3, 10, 10)
         newIndividual['Fitness'] = fitnessRobot(newIndividual['Genome'], False)
         mergedPopulation.append(newIndividual)
     mergedPopulation = sorted(mergedPopulation, key=lambda k:k['Fitness'])
@@ -180,7 +180,7 @@ def nextGeneration_2(population, popSize, p_croisement):
     for i in range(n_mutation):
         indv = tournamentSelection(population, tournSize)
         newIndividual = {}
-        newIndividual['Genome'] = mutation(indv['Genome'], 0.3, 20, 10)
+        newIndividual['Genome'] = mutation(indv['Genome'], 0.3, 10, 10)
         newIndividual['Fitness'] = fitnessRobot(newIndividual['Genome'], False)
         mergedPopulation.append(newIndividual)
     mergedPopulation = sorted(mergedPopulation, key=lambda k:k['Fitness'])
@@ -212,7 +212,7 @@ def nextGeneration_3(population, popSize, p_croisement, p_change):
     for i in range(n_mutation):
         indv = tournamentSelection(population[n_parent:popSize], tournSize)
         newIndividual = {}
-        newIndividual['Genome'] = mutation(indv['Genome'], 0.3, 20, 10)
+        newIndividual['Genome'] = mutation(indv['Genome'], 0.3, 10, 10)
         newIndividual['Fitness'] = fitnessRobot(newIndividual['Genome'], False)
         population[population.index(indv)] = newIndividual
     population = sorted(population, key=lambda k:k['Fitness'])
