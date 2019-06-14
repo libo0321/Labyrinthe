@@ -5,6 +5,7 @@ import sys
 import random
 import numpy as np
 
+
 '''This function accepts in input a list of strings, and tries to parse them to update the position of a robot. Then returns distance from objective.'''
 def fitnessRobot(listOfCommands, visualize=False) :
     
@@ -106,6 +107,7 @@ def mutation(genome, mu, tau_move, tau_rotation):
                 genome[i] = 'move' + length
     return genome
 
+'''TAUX DE RENOUVELLEMENT FIXE '''
 '''This function will generate the next generation with the first method: mu-lambda best parents are conserved, and lambda new children are produced.'''
 def nextGeneration_1(population, popSize, p_croisement, p_enfant):
     n_enfant = int(popSize * p_enfant)
@@ -123,13 +125,74 @@ def nextGeneration_1(population, popSize, p_croisement, p_enfant):
         newIndividual['Genome'] = croisement(indv1['Genome'], indv2['Genome'])
         newIndividual['Fitness'] = fitnessRobot(newIndividual['Genome'], False)
         mergedPopulation.append(newIndividual)
+    # generate children by mutation
     for i in range(n_mutation):
         indv = tournamentSelection(population, tournSize)
         newIndividual = {}
         newIndividual['Genome'] = mutation(indv['Genome'], 0.3, 20, 10)
         newIndividual['Fitness'] = fitnessRobot(newIndividual['Genome'], False)
         mergedPopulation.append(newIndividual)
+    mergedPopulation = sorted(mergedPopulation, key=lambda k:k['Fitness'])
     return mergedPopulation
+
+'''TAUX DE RENOUVELLEMENT VARIABLE'''
+'''This function will generate the next generation with the second method: all parents are conserved, and lambda (for now lambda=popSize) new children are produced, and we select popSize best individuals in the merged population.'''
+def nextGeneration_2(population, popSize, p_croisement):
+    mergedPopulation = population
+    n_enfant = popSize
+    n_croisement = int(n_enfant * p_croisement)
+    n_mutation = n_enfant - n_croisement
+    tournSize = 2 # Taille de tournoi
+    # generate children by croisement
+    for i in range(n_croisement):
+        newIndividual = {}
+        # Selection de l'individu à croiser
+        indv1 = tournamentSelection(population, tournSize)
+        indv2 = tournamentSelection(population, tournSize)
+        newIndividual['Genome'] = croisement(indv1['Genome'], indv2['Genome'])
+        newIndividual['Fitness'] = fitnessRobot(newIndividual['Genome'], False)
+        mergedPopulation.append(newIndividual)
+    # generate children by mutation
+    for i in range(n_mutation):
+        indv = tournamentSelection(population, tournSize)
+        newIndividual = {}
+        newIndividual['Genome'] = mutation(indv['Genome'], 0.3, 20, 10)
+        newIndividual['Fitness'] = fitnessRobot(newIndividual['Genome'], False)
+        mergedPopulation.append(newIndividual)
+    mergedPopulation = sorted(mergedPopulation, key=lambda k:k['Fitness'])
+    return mergedPopulation[0: popSize]
+
+
+'''L'ENCHAÎNEMENT DES OPÉRATIONS : en parallèle '''
+'''This function will generate the next generation with the third method: elite parents are conserved, and p_croisement of the rest will do the croisement and then p_mutation of them mutate.'''
+def nextGeneration_3(population, popSize, p_croisement, p_change):
+    n_change = int(popSize * p_change)
+    n_parent = popSize - n_change
+    n_croisement = int(n_change * p_croisement)
+    n_mutation = n_change - n_croisement
+    tournSize = 2 # Taille de tournoi
+    # generate children by croisement
+    for i in range(int(n_croisement/2)):
+        newIndividual1 = {}
+        newIndividual2 = {}
+        # Selection de l'individu à croiser
+        indv1 = tournamentSelection(population[n_parent:popSize], tournSize)
+        indv2 = tournamentSelection(population[n_parent:popSize], tournSize)
+        newIndividual1['Genome'] = croisement(indv1['Genome'], indv2['Genome'])
+        newIndividual1['Fitness'] = fitnessRobot(newIndividual1['Genome'], False)
+        newIndividual2['Genome'] = croisement(indv1['Genome'], indv2['Genome'])
+        newIndividual2['Fitness'] = fitnessRobot(newIndividual2['Genome'], False)
+        population[population.index(indv1)] = newIndividual1
+        population[population.index(indv2)] = newIndividual2
+    # generate children by mutation
+    for i in range(n_mutation):
+        indv = tournamentSelection(population[n_parent:popSize], tournSize)
+        newIndividual = {}
+        newIndividual['Genome'] = mutation(indv['Genome'], 0.3, 20, 10)
+        newIndividual['Fitness'] = fitnessRobot(newIndividual['Genome'], False)
+        population[population.index(indv)] = newIndividual
+    population = sorted(population, key=lambda k:k['Fitness'])
+    return population
 
 
 ################# MAIN
@@ -181,7 +244,8 @@ def main() :
     for it in range(n_gen): # un tour de boucle = une génération
         # 3 ways to generate the next generation
         poplulation = nextGeneration_1(population, popSize, p_croisement, p_enfant)
-        population = sorted(population, key=lambda k:k['Fitness'])
+        # poplulation = nextGeneration_2(population, popSize, p_croisement)
+        # poplulation = nextGeneration_3(population, popSize, p_croisement, p_enfant)
         fitnesses = [p['Fitness'] for p in population]
         infosFitnesses = []
         bestFit = fitnesses[0]
