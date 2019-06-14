@@ -30,8 +30,8 @@ def fitnessRobot(listOfCommands, visualize=False):
     walls.append(wall2)
 
     # initial position and orientation of the robot
-    robotX = 10
-    robotY = 10
+    startX = robotX = 10
+    startY = robotY = 10
     Degree= 90  # 90°
 
     # position of the objective
@@ -42,7 +42,8 @@ def fitnessRobot(listOfCommands, visualize=False):
     positions = []
     positions.append([robotX, robotY])
 
-    # TODO move robot, check that the robot stays inside the arena and stop movement if a wall is hit\
+    # TODO move robot, check that the robot stays inside the arena and stop movement if a wall is hit
+    
     for command in listOfCommands:
         if command.startswith('rotate'):
             Degree = Degree + int(command[6:len(command)])
@@ -107,9 +108,9 @@ def tournamentSelection(population, size):
 
 def croisement(genome1, genome2):
     n_commands = len(genome1)
-    pCros = random.uniforme(0, 1)
+    pCros = random.uniform(0, 1)
     for i in range(n_commands):
-        ifCros = random.uniforme(0, 1)
+        ifCros = random.uniform(0, 1)
         if ifCros<pCros:
             genome1[i] = genome2[i]
     return genome1
@@ -118,15 +119,15 @@ def croisement(genome1, genome2):
 def mutation(genome, mu, tau_move, tau_rotation):
     n_commands = len(genome)
     for i in range(n_commands):
-        pMu = random.uniforme(0, 1)
+        pMu = random.uniform(0, 1)
         if pMu<mu:
             if genome[i][0]=='r':
-                angle = filter(str.isdigit, genome[i])
+                angle = int(genome[i][6:len(genome[i])])
                 angle = angle + random.randint(-tau_rotation, tau_rotation)
                 genome[i] = 'rotate' + str(angle)
             else:
-                length = filter(str.isdigit, genome[i])
-                length = length + randint(-tau_move, tau_move)
+                length = int(genome[i][4:len(genome[i])])
+                length = length + random.randint(-tau_move, tau_move)
                 length = max(0, min(length, 40))
                 genome[i] = 'move' + str(length)
     return genome
@@ -278,8 +279,8 @@ def main() :
         stdFit = np.std(fitnesses)
         infosFitnesses.append([bestFit, meanFit, worstFit, stdFit])
         print('Gen ', it+1, ': Best: ', bestFit, ' Mean: ', meanFit, ' Worst:', worstFit, 'Std: ', stdFit)
-    fitnessRobot(population, True)
-	return 0
+    fitnessRobot(population[0]['Genome'], True)
+    return 0
 
 if __name__ == "__main__" :
 	sys.exit( main() )
