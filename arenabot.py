@@ -91,11 +91,18 @@ def fitnessRobot(listOfCommands, visualize=False):
 
     return distanceFromObjective
 
-def move_possible(walls,a,b):
+def move_possible(walls, a0, b0, a, b):
     for wall in walls:
-        if a > 0 and a < 100 and b >0 and b < 100:
-            if a > wall['x'] and a < wall['x']+wall['width'] and b > wall['y'] and b <wall['y'] + wall['height'] :
+        wall_x1 = wall['x']
+        wall_y1 = wall['y']
+        wall_x2 = wall['x'] + wall['width']
+        wall_y2 = wall['y'] + wall['height']
+        if a >= 0 and a <= 100 and b >= 0 and b <= 100:
+            if a > wall_x1 and a < wall_x2 and b > wall_y1 and b < wall_y2:
                 return False
+            else:
+                if max(a0,a)>=min(wall_x1,wall_x2) and max(wall_x1,wall_x2)>=min(a0,a) and max(b0,b)>=min(wall_y1,wall_y2) and max(wall_y1,wall_y2)>=min(b0,b):
+                    return False
         else:
             return False
     return True
