@@ -3,6 +3,17 @@ import random
 import numpy as np
 import math
 
+def calcul_distance(robotX, robotY, objectiveX, objectiveY):
+    distance = abs(robotX - objectiveX)
+    if robotX<=40:
+        distance = distance + 160 + abs(robotY - objectiveY)
+    elif robotX<=80:
+        distance = distance + 80 + abs(robotY - 10)
+    else:
+        distance = distance + abs(robotY - objectiveY)
+    return distance
+
+
 def fitnessRobot(listOfCommands, visualize=False):
     # the Arena is a 100 x 100 pixel space
     arenaLength = 100
@@ -47,7 +58,7 @@ def fitnessRobot(listOfCommands, visualize=False):
             # print(distance)
             destiX = robotX + distance*math.cos(Degree/180*math.pi)
             destiY = robotY + distance*math.sin(Degree/180*math.pi)
-            if move_possible(walls,destiX,destiY):
+            if move_possible(walls,robotX, robotY, destiX,destiY):
                 robotX = destiX
                 robotY = destiY
                 positions.append([robotX, robotY])
@@ -56,7 +67,7 @@ def fitnessRobot(listOfCommands, visualize=False):
             # print("robotX : ", robotX)
             # print("robotY : ", robotY)
 
-    distanceFromObjective = math.sqrt((robotX - objectiveX) ** 2 + (robotY - objectiveY) ** 2)
+    distanceFromObjective = calcul_distance(robotX, robotY, objectiveX, objectiveY)
 
 
 # this is optional, argument "visualize" has to be explicitly set to "True" when function is called
@@ -76,9 +87,9 @@ def fitnessRobot(listOfCommands, visualize=False):
             ax.add_patch(patches.Rectangle((wall["x"], wall["y"]), wall["width"], wall["height"]))
 
         # plot a series of lines describing the movement of the robot in the arena
-        for i in range(1, len(positions)):
-            ax.plot([positions[i - 1][0], positions[i][0]], [positions[i - 1][1], positions[i][1]], 'r-',
-                    label="Robot path")
+        for i in range(1, len(positions)-1):
+            ax.plot([positions[i - 1][0], positions[i][0]], [positions[i - 1][1], positions[i][1]], 'r-')
+        ax.plot([positions[len(positions) - 2][0], positions[len(positions)-1][0]], [positions[len(positions) - 2][1], positions[len(positions)-1][1]], 'r-',label="Robot path")
 
         ax.set_title("Movements of the robot inside the arena")
         ax.legend(loc='best')
@@ -112,8 +123,8 @@ def tournamentSelection(population, size):
 def croisement(genome1, genome2):
     n_commands1 = len(genome1)
     n_commands2 = len(genome2)
-    print(n_commands1, n_commands2)
-    print()
+    # print(n_commands1, n_commands2)
+    # print()
     enfant = []
     #pCros = random.uniform(0, 1)
     pCros = 0.5
@@ -149,8 +160,6 @@ def mutation(genome, mu, tau_move, tau_rotation):
 
 '''TAUX DE RENOUVELLEMENT FIXE '''
 '''This function will generate the next generation with the first method: mu-lambda best parents are conserved, and lambda new children are produced.'''
-
-
 def nextGeneration_1(population, popSize, p_croisement, p_enfant):
     n_enfant = int(popSize * p_enfant)
     n_parent = popSize - n_enfant
@@ -180,8 +189,6 @@ def nextGeneration_1(population, popSize, p_croisement, p_enfant):
 
 '''TAUX DE RENOUVELLEMENT VARIABLE'''
 '''This function will generate the next generation with the second method: all parents are conserved, and lambda (for now lambda=popSize) new children are produced, and we select popSize best individuals in the merged population.'''
-
-
 def nextGeneration_2(population, popSize, p_croisement):
     mergedPopulation = population
     n_enfant = popSize
@@ -249,10 +256,10 @@ def main():
     # listOfCommands = []
     # fitnessRobot(listOfCommands, visualize=True)
 
-    popSize = 20  # population
-    n_commands = 20  # length of the command list of each person
-    n_rotate = 0.2  # proportion of rotate commands
-    n_gen = 10  # number of generations
+    popSize = 200  # population
+    n_commands = 90  # length of the command list of each person
+    n_rotate = 0.3  # proportion of rotate commands
+    n_gen = 100  # number of generations
 
     # generation 0
     population = []
@@ -265,8 +272,8 @@ def main():
                 # rotate angle should be between -90 and 90
                 command = 'rotate' + str(random.randint(-90, 90))
             else:
-                # move length should be between 1 and 40
-                command = 'move' + str(random.randint(1, 20))
+                # move length should be between 1 and 20
+                command = 'move' + str(random.randint(1, 40))
             commands.append(command)
         newIndividual['Genome'] = commands
         newIndividual['Fitness'] = fitnessRobot(commands, False)
@@ -291,7 +298,7 @@ def main():
     print('fitness_correspondant_list_of_Command :',Ge)
 
 
-    p_croisement = 0.5  # proportion of croisement, 1-p_croisement the proportion of mutatoion
+    p_croisement = 0.7  # proportion of croisement, 1-p_croisement the proportion of mutatoion
     p_enfant = 0.5  # p_enfant * popSize the number of children produced
 
     for it in range(n_gen):  # un tour de boucle = une génération
@@ -301,7 +308,7 @@ def main():
         # poplulation = nextGeneration_3(population, popSize, p_croisement, p_enfant)
         #population = sorted(population, key=lambda k: k['Fitness'])
         fitnesses = [p['Fitness'] for p in population]
-        Ge = [fitnessRobot(p['Genome'],False) for p in population]
+        # Ge = [fitnessRobot(p['Genome'],False) for p in population]
         bestFit = fitnesses[0]
         meanFit = np.mean(fitnesses)
         worstFit = fitnesses[-1]
@@ -309,8 +316,8 @@ def main():
         infosFitnesses.append([bestFit, meanFit, worstFit, stdFit])
         print('Gen ', it + 1, ': Best: ', bestFit, ' Mean: ', meanFit, ' Worst:', worstFit, 'Std: ', stdFit)
         # print('Population', population)
-        print('fitness :',fitnesses)
-        print('fitness_correspondant_list_of_Command :',Ge)
+        # print('fitness :',fitnesses)
+        # print('fitness_correspondant_list_of_Command :',Ge)
         print('\n')
         # print(fitnessRobot(population[0]['Genome'], False), population[0]['Fitness'])
 

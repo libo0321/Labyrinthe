@@ -3,6 +3,19 @@ import random
 import numpy as np
 import math
 
+
+'''This function will calculate the distance between the robot and the objective.'''
+def calcul_distance(robotX, robotY, objectiveX, objectiveY):
+    distance = abs(robotX - objectiveX)
+    if robotX<=40:
+        distance = distance + 160 + abs(robotY - objectiveY)
+    elif robotX<=80:
+        distance = distance + 80 + abs(robotY - 10)
+    else:
+        distance = distance + abs(robotY - objectiveY)
+    return distance
+
+
 '''This function accepts in input a list of strings, and tries to parse them to update the position of a robot. Then returns distance from objective.'''
 def fitnessRobot(listOfCommands, visualize=False):
     # the Arena is a 100 x 100 pixel space
@@ -51,7 +64,7 @@ def fitnessRobot(listOfCommands, visualize=False):
             # print(distance)
             destiX = robotX + distance*math.cos(Degree/180*math.pi)
             destiY = robotY + distance*math.sin(Degree/180*math.pi)
-            if move_possible(walls,destiX,destiY):
+            if move_possible(walls, robotX, robotY, destiX, destiY):
                 robotX = destiX
                 robotY = destiY
                 positions.append([robotX, robotY])
@@ -62,7 +75,7 @@ def fitnessRobot(listOfCommands, visualize=False):
             
     # measure distance from objective
 
-    distanceFromObjective = math.sqrt((robotX-objectiveX)**2+(robotY-objectiveY)**2)
+    distanceFromObjective = calcul_distance(robotX, robotY, objectiveX, objectiveY)
 
     # this is optional, argument "visualize" has to be explicitly set to "True" when function is called
     if visualize:
@@ -81,9 +94,10 @@ def fitnessRobot(listOfCommands, visualize=False):
             ax.add_patch(patches.Rectangle((wall["x"], wall["y"]), wall["width"], wall["height"]))
 
         # plot a series of lines describing the movement of the robot in the arena
-        for i in range(1, len(positions)):
-            ax.plot([positions[i - 1][0], positions[i][0]], [positions[i - 1][1], positions[i][1]], 'r-',
-                    label="Robot path")
+        for i in range(1, len(positions)-1):
+            ax.plot([positions[i - 1][0], positions[i][0]], [positions[i - 1][1], positions[i][1]], 'r-')
+        ax.plot([positions[len(positions) - 2][0], positions[len(positions)-1][0]], [positions[len(positions) - 2][1], positions[len(positions)-1][1]], 'r-',label="Robot path")
+
 
         ax.set_title("Movements of the robot inside the arena")
         ax.legend(loc='best')
@@ -245,10 +259,10 @@ def main() :
     # listOfCommands = []
     # fitnessRobot(listOfCommands, visualize=True)
     
-    popSize = 50 # population
-    n_commands = 20 # length of the command list of each person
-    n_rotate = 0.2 # proportion of rotate commands
-    n_gen = 20 # number of generations
+    popSize = 200 # population
+    n_commands = 90 # length of the command list of each person
+    n_rotate = 0.5 # proportion of rotate commands
+    n_gen = 200 # number of generations
     
     # generation 0
     population = []
@@ -281,8 +295,8 @@ def main() :
     infosFitnesses.append([bestFit, meanFit, worstFit, stdFit])
     print('Gen ', 0, ': Best: ', bestFit, ' Mean: ', meanFit, ' Worst:', worstFit, 'Std: ', stdFit)
 
-    p_croisement = 0.5 # proportion of croisement, 1-p_croisement the proportion of mutatoion
-    p_enfant = 0.5 # p_enfant * popSize the number of children produced
+    p_croisement = 0.8 # proportion of croisement, 1-p_croisement the proportion of mutatoion
+    p_enfant = 0.6 # p_enfant * popSize the number of children produced
     
     for it in range(n_gen): # un tour de boucle = une génération
         # 3 ways to generate the next generation
