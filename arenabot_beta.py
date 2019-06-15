@@ -256,10 +256,10 @@ def main():
     # listOfCommands = []
     # fitnessRobot(listOfCommands, visualize=True)
 
-    popSize = 200  # population
-    n_commands = 90  # length of the command list of each person
+    popSize = 20  # population
+    n_commands = 20  # length of the command list of each person
     n_rotate = 0.3  # proportion of rotate commands
-    n_gen = 100  # number of generations
+    n_gen = 10  # number of generations
 
     # generation 0
     population = []
@@ -303,9 +303,9 @@ def main():
 
     for it in range(n_gen):  # un tour de boucle = une génération
         # 3 ways to generate the next generation
-        population = nextGeneration_1(population, popSize, p_croisement, p_enfant)
-        # poplulation = nextGeneration_2(population, popSize, p_croisement)
-        # poplulation = nextGeneration_3(population, popSize, p_croisement, p_enfant)
+        # population = nextGeneration_1(population, popSize, p_croisement, p_enfant)
+        population = nextGeneration_2(population, popSize, p_croisement)
+        # population = nextGeneration_3(population, popSize, p_croisement, p_enfant)
         #population = sorted(population, key=lambda k: k['Fitness'])
         fitnesses = [p['Fitness'] for p in population]
         # Ge = [fitnessRobot(p['Genome'],False) for p in population]
@@ -315,7 +315,8 @@ def main():
         stdFit = np.std(fitnesses)
         infosFitnesses.append([bestFit, meanFit, worstFit, stdFit])
         print('Gen ', it + 1, ': Best: ', bestFit, ' Mean: ', meanFit, ' Worst:', worstFit, 'Std: ', stdFit)
-        # print('Population', population)
+        print('Population', population)
+        print('length of population', len(population))
         # print('fitness :',fitnesses)
         # print('fitness_correspondant_list_of_Command :',Ge)
         print('\n')
