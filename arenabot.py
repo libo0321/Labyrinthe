@@ -260,7 +260,7 @@ def main() :
     # fitnessRobot(listOfCommands, visualize=True)
     
     popSize = 200 # population
-    n_commands = 90 # length of the command list of each person
+    n_commands = 60 # length of the command list of each person
     n_rotate = 0.5 # proportion of rotate commands
     n_gen = 200 # number of generations
     
