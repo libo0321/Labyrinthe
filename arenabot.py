@@ -264,45 +264,31 @@ def main() :
     n_rotate = 0.5 # proportion of rotate commands
     n_gen = 200 # number of generations
     
-    # generation 0
-    population = []
-    for i in range(popSize):
-        newIndividual = {}
-        commands = []
-        for j in range(n_commands):
-            n_random = random.randint(1, 100)
-            if n_random<=100*n_rotate:
-                # rotate angle should be between -90 and 90
-                command = 'rotate' + str(random.randint(-90, 90))
-            else:
-                # move length should be between 1 and 40
-                command = 'move' + str(random.randint(1,40))
-            commands.append(command)
-        newIndividual['Genome'] = commands
-        newIndividual['Fitness'] = fitnessRobot(commands, False)
-        population.append(newIndividual)
+    n_simulation = 10
+    best = []
+    for simu in range(n_simulation):
+        # generation 0
+        population = []
+        for i in range(popSize):
+            newIndividual = {}
+            commands = []
+            for j in range(n_commands):
+                n_random = random.randint(1, 100)
+                if n_random<=100*n_rotate:
+                    # rotate angle should be between -90 and 90
+                    command = 'rotate' + str(random.randint(-90, 90))
+                else:
+                    # move length should be between 1 and 40
+                    command = 'move' + str(random.randint(1,40))
+                commands.append(command)
+            newIndividual['Genome'] = commands
+            newIndividual['Fitness'] = fitnessRobot(commands, False)
+            population.append(newIndividual)
     
-    #Tri de la population en fonction de la Fitness des individus
-    population = sorted(population, key=lambda k:k['Fitness'])
+        #Tri de la population en fonction de la Fitness des individus
+        population = sorted(population, key=lambda k:k['Fitness'])
     
-    #Calcul des informations sur la population : meilleure fitness, fitness moyenne, pire fitness et déviation standard des fitness
-    fitnesses = [p['Fitness'] for p in population]
-    infosFitnesses = []
-    bestFit = fitnesses[0]
-    meanFit = np.mean(fitnesses)
-    worstFit = fitnesses[-1]
-    stdFit = np.std(fitnesses)
-    infosFitnesses.append([bestFit, meanFit, worstFit, stdFit])
-    print('Gen ', 0, ': Best: ', bestFit, ' Mean: ', meanFit, ' Worst:', worstFit, 'Std: ', stdFit)
-
-    p_croisement = 0.8 # proportion of croisement, 1-p_croisement the proportion of mutatoion
-    p_enfant = 0.6 # p_enfant * popSize the number of children produced
-    
-    for it in range(n_gen): # un tour de boucle = une génération
-        # 3 ways to generate the next generation
-        population = nextGeneration_1(population, popSize, p_croisement, p_enfant)
-        # population = nextGeneration_2(population, popSize, p_croisement)
-        # population = nextGeneration_3(population, popSize, p_croisement, p_enfant)
+        #Calcul des informations sur la population : meilleure fitness, fitness moyenne, pire fitness et déviation standard des fitness
         fitnesses = [p['Fitness'] for p in population]
         infosFitnesses = []
         bestFit = fitnesses[0]
@@ -310,9 +296,29 @@ def main() :
         worstFit = fitnesses[-1]
         stdFit = np.std(fitnesses)
         infosFitnesses.append([bestFit, meanFit, worstFit, stdFit])
-        print('Gen ', it+1, ': Best: ', bestFit, ' Mean: ', meanFit, ' Worst:', worstFit, 'Std: ', stdFit)
-    fitnessRobot(population[0]['Genome'], True)
-    print(population[0]['Fitness'])
+        print('Simu', simu+1, 'Gen ', 0, ': Best: ', bestFit, ' Mean: ', meanFit, ' Worst:', worstFit, 'Std: ', stdFit)
+
+        p_croisement = 0.8 # proportion of croisement, 1-p_croisement the proportion of mutatoion
+        p_enfant = 0.6 # p_enfant * popSize the number of children produced
+    
+        for it in range(n_gen): # un tour de boucle = une génération
+            # 3 ways to generate the next generation
+            # population = nextGeneration_1(population, popSize, p_croisement, p_enfant)
+            population = nextGeneration_2(population, popSize, p_croisement)
+            # population = nextGeneration_3(population, popSize, p_croisement, p_enfant)
+            fitnesses = [p['Fitness'] for p in population]
+            infosFitnesses = []
+            bestFit = fitnesses[0]
+            meanFit = np.mean(fitnesses)
+            worstFit = fitnesses[-1]
+            stdFit = np.std(fitnesses)
+            infosFitnesses.append([bestFit, meanFit, worstFit, stdFit])
+            print('Simu', simu+1, 'Gen ', it+1, ': Best: ', bestFit, ' Mean: ', meanFit, ' Worst:', worstFit, 'Std: ', stdFit)
+        best.append(population[0])
+    best = sorted(best, key=lambda k:k['Fitness'])
+    
+    print(best[0]['Fitness'])
+    fitnessRobot(best[0]['Genome'], True)
     return 0
 
 
